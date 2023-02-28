@@ -45,6 +45,8 @@ from pynput import keyboard
 import pydirectinput as pg
 import threading
 from collections import Counter
+import win32gui, win32con
+
 pg.KEYBOARD_MAPPING['page_up'] = 0xC9 + 1024
 pg.KEYBOARD_MAPPING['page_down'] = 0xD1 + 1024
 pg.KEYBOARD_MAPPING['caps_lock'] = 0x3A
@@ -132,6 +134,17 @@ def processScript(filename):
     f.close()
 
 def doByRows(filename, times):
+    hwnd = win32gui.FindWindow(None, windowTiele)
+    if hwnd == 0:
+        print(f"找不到windowTiele為{windowTiele}的視窗")
+    else:
+        # 将焦点设置为目标窗口
+        win32gui.SetForegroundWindow(hwnd)
+        # win32gui.ShowWindow(hwnd, win32con.SW_MINIMIZE)
+        # win32gui.SetActiveWindow(hwnd)
+        # win32gui.SetFocus(hwnd)
+        # win32gui.EnableWindow(hwnd, True)
+    
     f = open(filename, mode='r')
     lines = f.readlines()
     f.close()
@@ -174,10 +187,14 @@ def pause_and_continue(key):
 randomKeyList = ['f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7', 'f8', 'f9', 'f10', 'f11', 'f12', 'f13']
 datapath = 'C:/ProgramData/Pmagic/Log/'
 escEvent = threading.Event()
+windowTiele = 'MapleStory'
+hwnd = win32gui.FindWindow(None, windowTiele)
+win32gui.PostMessage(hwnd, win32con.WM_KEYDOWN,'x','0x2D')
+time.sleep(1)
+win32gui.PostMessage(hwnd, win32con.WM_KEYUP,'x','0x2D')
+
 
 while True:
-    # processScript('重砲-2樓咖啡廳.log')
-    # input()
     print = _print
     sys.stdout = _stdout
     sys.stderr = _stderr
