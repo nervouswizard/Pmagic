@@ -1,0 +1,255 @@
+import os, sys, time, random
+
+def createFolder(directory):
+    try:
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+    except OSError:
+        print('Error: Creating directory. ' + directory)
+
+class Logger(object):
+    def __init__(self, filename='Log/default.log', stream=sys.stdout):
+        self.terminal = stream
+        self.log = open(filename, 'w')
+
+    @classmethod
+    def timestamped_print(self, *args, **kwargs):
+        _print(time.strftime("[%Y/%m/%d %X]"), *args, **kwargs)
+
+    @classmethod
+    def scriptTime_print(self, *args, **kwargs):
+        _print(time.time()-startTime, *args, **kwargs)
+
+    def write(self, message):
+        self.terminal.write(message)
+        self.terminal.flush()
+        self.log.write(message)
+        self.log.flush()
+
+    def flush(self):
+        pass
+
+def log_history(name_s_log):
+    # log
+    createFolder('C:/ProgramData/Pmagic')
+    createFolder('C:/ProgramData/Pmagic/Log')
+    sys.stdout = Logger('C:/ProgramData/Pmagic/Log/' + name_s_log + '.log', sys.stdout)
+    sys.stderr = Logger('C:/ProgramData/Pmagic/Log/' + name_s_log + '.err', sys.stderr)
+
+startTime = time.time()
+_print = print
+_stdout = sys.stdout
+_stderr = sys.stderr
+
+from pynput import keyboard
+import pydirectinput as pg
+import threading
+from collections import Counter
+pg.KEYBOARD_MAPPING['page_up'] = 0xC9 + 1024
+pg.KEYBOARD_MAPPING['page_down'] = 0xD1 + 1024
+pg.KEYBOARD_MAPPING['caps_lock'] = 0x3A
+pg.KEYBOARD_MAPPING['shift_l'] = 0x2A
+pg.KEYBOARD_MAPPING['shift_r'] = 0x36
+pg.KEYBOARD_MAPPING['ctrl_l'] = 0x1D
+pg.KEYBOARD_MAPPING['ctrl_r'] = 0x9D + 1024
+pg.KEYBOARD_MAPPING['alt_l'] = 0x38
+pg.KEYBOARD_MAPPING['alt_r'] = 0xB8 + 1024
+
+def on_press(key):
+    try:
+        print(f'{key.char} pressed')
+    except AttributeError:
+        print(f'{key} pressed')
+
+def on_release(key):
+    try:
+        print(f'{key.char} released')
+    except AttributeError:
+        print(f'{key} released')
+    if key == keyboard.Key.esc:
+        # Stop listener
+        return False
+
+def on_escpress(key):
+    if key == keyboard.Key.esc:
+        escEvent.set()
+        return False
+
+def pressKey(key):
+    pg.keyDown(key, _pause = False)
+
+def releaseKey(key):
+    pg.keyUp(key, _pause = False)
+
+def pressReleaseKey(key):
+    pg.press(key)
+
+def processScript(filename):
+    f = open(datapath + filename, mode='r')
+    lines = f.readlines()
+    f.close()
+    beginIdx = 0
+    for i in range(len(lines)):
+        if i == len(lines): continue
+        lines[i] = lines[i].replace('\n', '')
+        lines[i] = lines[i].split(' ')
+        if lines[i][1].startswith('Key.'): lines[i][1] = lines[i][1].replace('Key.', '')
+        lines[i][0] = float(lines[i][0])
+        if lines[i][1] == 'page_down' and lines[i][2] == 'released' and beginIdx == 0:
+            beginIdx = i+1
+        if lines[i][1] == 'esc' and lines[i][2] == 'pressed':
+            endIdx = i
+            break
+    lines = lines[beginIdx:endIdx]
+
+    keylist = []
+    keyCounter = Counter()
+    for i in range(len(lines)):
+        if lines[i][2] == 'released':
+            keylist.append(lines[i])
+            keyCounter[lines[i][1]+'pressed'] -= 1
+        elif lines[i][2] == 'pressed':
+            if keyCounter[lines[i][1]+lines[i][2]] == 0:
+                keylist.append(lines[i])
+                keyCounter[lines[i][1]+lines[i][2]] += 1
+        
+    LastTime = keylist[0][0]
+    for i in range(len(keylist)):
+        if i == len(keylist): continue
+        if i == 0:
+            keylist[i][0] = 0
+            continue
+        temp = keylist[i][0]-LastTime
+        LastTime = keylist[i][0]
+        keylist[i][0] = temp
+        
+    createFolder(datapath + 'Script/')
+    filename = filename.replace('.log', '.script')
+    f = open(datapath + 'Script/' + filename, mode='w')
+    for line in keylist:
+        line = [str(line[i]) for i in range(len(line))]
+        f.write(' '.join(line)+'\n')
+    f.close()
+
+def doByRows(filename, times):
+    f = open(filename, mode='r')
+    lines = f.readlines()
+    f.close()
+    scriptTime = 0.0
+    for i in range(len(lines)):
+        lines[i] = lines[i].replace('\n', '')
+        lines[i] = lines[i].split(' ')
+        lines[i][0] = float(lines[i][0])
+        scriptTime += lines[i][0]
+
+    print(f"第{times}次迴圈倒數1秒")
+    print('script Time: ', scriptTime)
+    time.sleep(1)
+    print('1')
+    for key in randomKeyList:
+        if random.random()>0.5:
+            pressReleaseKey(key)
+            # threading.Thread(target = pressReleaseKey, args = (key, ))
+            time.sleep(0.1)
+    TimeFlag = time.time()
+    for line in lines:
+        if escEvent.is_set():
+            escEvent.clear()
+            return True
+        time.sleep(max(0, line[0]-0.008344340294710874))
+        #-random.uniform(0.0072, 0.0082)
+        if line[2] == 'pressed':
+            threading.Thread(target = pressKey, args = (line[1], )).start()
+        elif line[2] == 'released':
+            threading.Thread(target = releaseKey, args = (line[1], )).start()
+    ProcessTime = time.time()-TimeFlag
+    print('Process Time', ProcessTime)
+    print(f'相差{ProcessTime - scriptTime}秒')
+    print(f'平均每個指令相差{(ProcessTime - scriptTime)/len(lines)}秒')
+
+def pause_and_continue(key):
+    if key == keyboard.Key.esc:
+        escEvent.set()
+
+randomKeyList = ['f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7', 'f8', 'f9', 'f10', 'f11', 'f12', 'f13']
+datapath = 'C:/ProgramData/Pmagic/Log/'
+escEvent = threading.Event()
+
+while True:
+    # processScript('重砲-2樓咖啡廳.log')
+    # input()
+    print = _print
+    sys.stdout = _stdout
+    sys.stderr = _stderr
+    os.system('cls')
+    print("檔案儲存路徑:", datapath)
+    d1 = input("選擇功能：\n(1) 錄製腳本\n(2) 執行腳本\n(3) 刪除腳本\n(4) exit\n")
+
+    if d1 == '1':
+        while True:
+            scriptName = input("請輸入腳本名稱:")
+            if not os.path.exists(datapath+'Script/'+scriptName+'.script'):
+                break
+            print("腳本名稱重複")
+        
+        os.system('cls')
+        print("開始錄製腳本, 按下page_down後才算開始錄製")
+        startTime = time.time()
+        print = Logger.scriptTime_print
+        log_history(scriptName)
+        try:
+            with keyboard.Listener(on_press=on_press, on_release=on_release) as listener:
+                listener.join()
+        except:
+            pass
+        processScript(scriptName+'.log')
+
+    elif d1 == '2':
+        filelist = os.listdir(datapath+'Script/')
+        while True:
+            print('請選擇要執行的腳本')
+            for idx, file in enumerate(filelist):
+                print(f'({idx}) ', file)
+            d2 = int(input())
+            if d2 < len(filelist):
+                break
+            print("wrong number")
+
+        while True:
+            print('要執行幾次?')
+            d3 = int(input())
+            if d3 > 0:
+                break
+            print("wrong number")
+
+        os.system('cls')
+        print('執行腳本', filelist[d2])
+        print = Logger.timestamped_print
+        log_history(os.path.basename(__file__))
+        with keyboard.Listener(on_release=pause_and_continue):
+            for i in range(d3):
+                if doByRows(datapath+'Script/'+filelist[d2], i):
+                    break
+            print = _print
+
+    elif d1 == '3':
+        while True:
+            while True:
+                filelist = os.listdir(datapath+'Script/')
+                print('請選擇要刪除的腳本')
+                for idx, file in enumerate(filelist):
+                    print(f'({idx}) ', file)
+                print(f'({len(filelist)}) ', "exit")
+                d2 = int(input())
+                if d2 <= len(filelist): break
+                print("wrong number")
+            if d2 == len(filelist): break
+            print('刪除腳本', filelist[d2])
+            os.remove(datapath+'Script/'+filelist[d2])
+            os.system('cls')
+    
+    elif d1 == '4':
+        break
+
+    else:
+        print("wrong input")
