@@ -45,7 +45,9 @@ from pynput import keyboard
 import pydirectinput as pg
 import threading
 from collections import Counter
-import win32gui, win32con
+import win32gui
+import concurrent.futures
+from collections import deque
 
 pg.KEYBOARD_MAPPING['page_up'] = 0xC9 + 1024
 pg.KEYBOARD_MAPPING['page_down'] = 0xD1 + 1024
@@ -80,10 +82,10 @@ def on_escpress(key):
 def pressKey(key):
     pg.keyDown(key, _pause = False)
 
-def releaseKey(key):
+def release_key(key):
     pg.keyUp(key, _pause = False)
 
-def pressReleaseKey(key):
+def press_key(key):
     pg.press(key)
 
 def processScript(filename):
@@ -133,18 +135,13 @@ def processScript(filename):
         f.write(' '.join(line)+'\n')
     f.close()
 
-def doByRows(filename, times):
-    hwnd = win32gui.FindWindow(None, windowTiele)
-    if hwnd == 0:
-        print(f"找不到windowTiele為{windowTiele}的視窗")
-    else:
-        # 将焦点设置为目标窗口
-        win32gui.SetForegroundWindow(hwnd)
-        # win32gui.ShowWindow(hwnd, win32con.SW_MINIMIZE)
-        # win32gui.SetActiveWindow(hwnd)
-        # win32gui.SetFocus(hwnd)
-        # win32gui.EnableWindow(hwnd, True)
-    
+def process_line(line):
+    if line[2] == 'pressed':
+        pg.keyDown(line[1])
+    elif line[2] == 'released':
+        pg.keyUp(line[1])
+
+def read_script(filename):
     f = open(filename, mode='r')
     lines = f.readlines()
     f.close()
@@ -154,27 +151,48 @@ def doByRows(filename, times):
         lines[i] = lines[i].split(' ')
         lines[i][0] = float(lines[i][0])
         scriptTime += lines[i][0]
+    return scriptTime, lines
+
+def doByRows(filename, times):
+    hwnd = win32gui.FindWindow(None, windowTiele)
+    if hwnd == 0:
+        print(f"找不到windowTiele為{windowTiele}的視窗")
+    else:
+        # 将焦点设置为目标窗口
+        win32gui.SetForegroundWindow(hwnd)
+    
+    scriptTime, lines = read_script(filename)
 
     print(f"第{times}次迴圈倒數1秒")
     print('script Time: ', scriptTime)
     time.sleep(1)
-    print('1')
+
     for key in randomKeyList:
         if random.random()>0.5:
-            pressReleaseKey(key)
-            # threading.Thread(target = pressReleaseKey, args = (key, ))
+            press_key(key)
             time.sleep(0.1)
+
     TimeFlag = time.time()
-    for line in lines:
+
+    start_time = time.monotonic()
+    dqlines = deque(lines)
+    while dqlines:
         if escEvent.is_set():
             escEvent.clear()
             return True
-        time.sleep(max(0, line[0]-0.008344340294710874))
-        #-random.uniform(0.0072, 0.0082)
-        if line[2] == 'pressed':
-            threading.Thread(target = pressKey, args = (line[1], )).start()
-        elif line[2] == 'released':
-            threading.Thread(target = releaseKey, args = (line[1], )).start()
+        while True:
+            if not pauseEvent.is_set():
+                break
+        line = dqlines[0]
+        delay = line[0] - (time.monotonic() - start_time)
+        delay = delay - 0.0083
+        if delay > 0:
+            time.sleep(delay)
+            
+        start_time = time.monotonic()
+        executor.submit(process_line, line)
+        dqlines.popleft()
+
     ProcessTime = time.time()-TimeFlag
     print('Process Time', ProcessTime)
     print(f'相差{ProcessTime - scriptTime}秒')
@@ -183,16 +201,32 @@ def doByRows(filename, times):
 def pause_and_continue(key):
     if key == keyboard.Key.esc:
         escEvent.set()
+        pauseEvent.clear()
+
+def ForegroundWindowDetector():
+    while True:
+        if escEvent.is_set():
+            return True
+        
+        hwnd = win32gui.GetForegroundWindow()
+        title = win32gui.GetWindowText(hwnd)
+        # print(pauseEvent.is_set())
+        if not pauseEvent.is_set() and title != windowTiele:
+            pauseEvent.set()
+        if pauseEvent.is_set() and title == windowTiele:
+            pauseEvent.clear()
+        time.sleep(0.1)
 
 randomKeyList = ['f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7', 'f8', 'f9', 'f10', 'f11', 'f12', 'f13']
 datapath = 'C:/ProgramData/Pmagic/Log/'
 escEvent = threading.Event()
+pauseEvent = threading.Event()
 windowTiele = 'MapleStory'
 hwnd = win32gui.FindWindow(None, windowTiele)
-win32gui.PostMessage(hwnd, win32con.WM_KEYDOWN,'x','0x2D')
-time.sleep(1)
-win32gui.PostMessage(hwnd, win32con.WM_KEYUP,'x','0x2D')
-
+detector = threading.Thread(target = ForegroundWindowDetector)
+detector.daemon = True
+detector.start()
+executor = concurrent.futures.ThreadPoolExecutor(max_workers=10)
 
 while True:
     print = _print
@@ -267,6 +301,6 @@ while True:
     
     elif d1 == '4':
         break
-
+    
     else:
         print("wrong input")
