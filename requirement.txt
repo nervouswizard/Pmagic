@@ -1,0 +1,11 @@
+altgraph==0.17.3
+comtypes==1.1.14
+pefile==2023.2.7
+PyDirectInput==1.0.4
+pyinstaller==5.8.0
+pyinstaller-hooks-contrib==2023.0
+pynput==1.7.6
+pywin32==305
+pywin32-ctypes==0.2.0
+pywinauto==0.6.8
+six==1.16.0
