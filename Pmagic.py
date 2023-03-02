@@ -1,16 +1,13 @@
 import os, sys, time, random
 
-def createFolder(directory):
-    try:
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-    except OSError:
-        print('Error: Creating directory. ' + directory)
-
 class Logger(object):
-    def __init__(self, filename='Log/default.log', stream=sys.stdout):
+    def __init__(self, filename='Log/default.log', stream=sys.stdout, buffer_size=100000, flush_interval=200):
         self.terminal = stream
         self.log = open(filename, 'w')
+        self.buffer = []
+        self.buffer_size = buffer_size
+        self.flush_interval = flush_interval
+        self.last_flush_time = time.time()
 
     @classmethod
     def timestamped_print(self, *args, **kwargs):
@@ -22,19 +19,27 @@ class Logger(object):
 
     def write(self, message):
         self.terminal.write(message)
-        self.terminal.flush()
-        self.log.write(message)
-        self.log.flush()
+        self.buffer.append(message)
+        if len(self.buffer) > self.buffer_size or time.time() - self.last_flush_time >= self.flush_interval:
+            self.flush()
 
     def flush(self):
-        pass
+        if self.buffer:
+            self.log.writelines(self.buffer)
+            self.log.flush()
+            self.buffer.clear()
+            self.last_flush_time = time.time()
 
 def log_history(name_s_log):
     # log
-    createFolder('C:/ProgramData/Pmagic')
-    createFolder('C:/ProgramData/Pmagic/Log')
+    os.makedirs('C:/ProgramData/Pmagic', exist_ok=True)
+    os.makedirs('C:/ProgramData/Pmagic/Log', exist_ok=True)
     sys.stdout = Logger('C:/ProgramData/Pmagic/Log/' + name_s_log + '.log', sys.stdout)
+    f = open('C:/ProgramData/Pmagic/Log/' + name_s_log + '.log', 'a')
+    f.close()
     sys.stderr = Logger('C:/ProgramData/Pmagic/Log/' + name_s_log + '.err', sys.stderr)
+    f = open('C:/ProgramData/Pmagic/Log/' + name_s_log + '.err', 'a')
+    f.close()
 
 startTime = time.time()
 _print = print
@@ -61,16 +66,19 @@ pg.KEYBOARD_MAPPING['alt_r'] = 0xB8 + 1024
 
 def on_press(key):
     try:
-        print(f'{key.char} pressed')
+        char = key.char
     except AttributeError:
-        print(f'{key} pressed')
+        char = str(key)
+    print(f'{char} pressed')
 
 def on_release(key):
     try:
-        print(f'{key.char} released')
+        char = key.char
     except AttributeError:
-        print(f'{key} released')
+        char = str(key)
+    print(f'{char} released')
     if key == keyboard.Key.esc:
+        print('Stop listener', flush = True)
         # Stop listener
         return False
 
@@ -253,7 +261,7 @@ while True:
                 listener.join()
         except:
             pass
-        processScript(scriptName+'.log')
+        # processScript(scriptName+'.log')
 
     elif d1 == '2':
         filelist = os.listdir(datapath+'Script/')
