@@ -218,7 +218,7 @@ def ForegroundWindowDetector():
         time.sleep(0.1)
 
 randomKeyList = ['f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7', 'f8', 'f9', 'f10', 'f11', 'f12', 'f13']
-datapath = 'C:/ProgramData/Pmagic/Log/'
+datapath = 'C:/ProgramData/Pmagic_log/Log/'
 escEvent = threading.Event()
 pauseEvent = threading.Event()
 windowTiele = 'MapleStory'
