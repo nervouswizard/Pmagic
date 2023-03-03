@@ -10,11 +10,11 @@ class Logger(object):
         self.last_flush_time = time.time()
 
     @classmethod
-    def timestamped_print(self, *args, **kwargs):
+    def timestamped_print(cla, *args, **kwargs):
         _print(time.strftime("[%Y/%m/%d %X]"), *args, **kwargs)
 
     @classmethod
-    def scriptTime_print(self, *args, **kwargs):
+    def scriptTime_print(cls, *args, **kwargs):
         _print(time.time()-startTime, *args, **kwargs)
 
     def write(self, message):
@@ -27,19 +27,17 @@ class Logger(object):
         if self.buffer:
             self.log.writelines(self.buffer)
             self.log.flush()
-            self.buffer.clear()
+            self.buffer=[]
             self.last_flush_time = time.time()
 
 def log_history(name_s_log):
     # log
-    os.makedirs('C:/ProgramData/Pmagic', exist_ok=True)
-    os.makedirs('C:/ProgramData/Pmagic/Log', exist_ok=True)
-    sys.stdout = Logger('C:/ProgramData/Pmagic/Log/' + name_s_log + '.log', sys.stdout)
-    f = open('C:/ProgramData/Pmagic/Log/' + name_s_log + '.log', 'a')
-    f.close()
-    sys.stderr = Logger('C:/ProgramData/Pmagic/Log/' + name_s_log + '.err', sys.stderr)
-    f = open('C:/ProgramData/Pmagic/Log/' + name_s_log + '.err', 'a')
-    f.close()
+    os.makedirs(datapath, exist_ok=True)
+    log_file = f'{datapath}{name_s_log}.log'
+    err_file = f'{datapath}{name_s_log}.err'
+    with open(log_file, 'a'), open(err_file, 'a'):
+        sys.stdout = Logger(log_file, sys.stdout)
+        sys.stderr = Logger(err_file, sys.stderr)
 
 startTime = time.time()
 _print = print
@@ -135,7 +133,7 @@ def processScript(filename):
         LastTime = keylist[i][0]
         keylist[i][0] = temp
         
-    createFolder(datapath + 'Script/')
+    os.makedirs(datapath + 'Script/', exist_ok=True)
     filename = filename.replace('.log', '.script')
     f = open(datapath + 'Script/' + filename, mode='w')
     for line in keylist:
@@ -261,7 +259,7 @@ while True:
                 listener.join()
         except:
             pass
-        # processScript(scriptName+'.log')
+        processScript(scriptName+'.log')
 
     elif d1 == '2':
         filelist = os.listdir(datapath+'Script/')
@@ -269,14 +267,20 @@ while True:
             print('請選擇要執行的腳本')
             for idx, file in enumerate(filelist):
                 print(f'({idx}) ', file)
-            d2 = int(input())
+            try:
+                d2 = int(input())
+            except:
+                continue
             if d2 < len(filelist):
                 break
             print("wrong number")
 
         while True:
             print('要執行幾次?')
-            d3 = int(input())
+            try:
+                d3 = int(input())
+            except:
+                continue
             if d3 > 0:
                 break
             print("wrong number")
@@ -299,7 +303,10 @@ while True:
                 for idx, file in enumerate(filelist):
                     print(f'({idx}) ', file)
                 print(f'({len(filelist)}) ', "exit")
-                d2 = int(input())
+                try:
+                    d2 = int(input())
+                except:
+                    continue
                 if d2 <= len(filelist): break
                 print("wrong number")
             if d2 == len(filelist): break
