@@ -14,10 +14,6 @@ class Logger:
         self.last_flush_time = time.time()
 
     @classmethod
-    def timestamped_print(cls, *args, **kwargs):
-        _print(time.strftime("[%Y/%m/%d %X]"), *args, **kwargs)
-
-    @classmethod
     def script_time_print(cls, *args, **kwargs):
         _print(time.time()-startTime, *args, **kwargs)
 
