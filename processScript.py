@@ -1,7 +1,7 @@
 from collections import defaultdict
 import os
 
-def processScript(filename):
+def processScript(datapath, filename):
     with open(os.path.join(datapath, filename), mode='r') as f:
         lines = [line.strip().split(' ') for line in f]
 
@@ -37,4 +37,5 @@ def processScript(filename):
 
 
 datapath = 'C:/ProgramData/Pmagic/Log/'
-processScript('my_script.log')
+script_name = '202 風化悲傷之地.log'
+processScript(datapath, script_name)

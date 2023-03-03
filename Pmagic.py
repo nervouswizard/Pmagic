@@ -293,7 +293,7 @@ while True:
             for i in range(d3):
                 if doByRows(datapath+'Script/'+filelist[d2], i):
                     break
-            print = _print
+        print = _print
 
     elif d1 == '3':
         while True:
