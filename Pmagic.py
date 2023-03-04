@@ -32,9 +32,9 @@ class Logger(object):
 
 def log_history(name_s_log):
     # log
-    os.makedirs(datapath, exist_ok=True)
-    log_file = f'{datapath}{name_s_log}.log'
-    err_file = f'{datapath}{name_s_log}.err'
+    os.makedirs(logpath, exist_ok=True)
+    log_file = f'{logpath}{name_s_log}.log'
+    err_file = f'{logpath}{name_s_log}.err'
     with open(log_file, 'a'), open(err_file, 'a'):
         sys.stdout = Logger(log_file, sys.stdout)
         sys.stderr = Logger(err_file, sys.stderr)
@@ -51,6 +51,7 @@ from collections import Counter
 import win32gui
 import concurrent.futures
 from collections import deque
+from processScript import processScript
 
 pg.KEYBOARD_MAPPING['page_up'] = 0xC9 + 1024
 pg.KEYBOARD_MAPPING['page_down'] = 0xD1 + 1024
@@ -94,53 +95,6 @@ def release_key(key):
 def press_key(key):
     pg.press(key)
 
-def processScript(filename):
-    f = open(datapath + filename, mode='r')
-    lines = f.readlines()
-    f.close()
-    beginIdx = 0
-    for i in range(len(lines)):
-        if i == len(lines): continue
-        lines[i] = lines[i].replace('\n', '')
-        lines[i] = lines[i].split(' ')
-        if lines[i][1].startswith('Key.'): lines[i][1] = lines[i][1].replace('Key.', '')
-        lines[i][0] = float(lines[i][0])
-        if lines[i][1] == 'page_down' and lines[i][2] == 'released' and beginIdx == 0:
-            beginIdx = i+1
-        if lines[i][1] == 'esc' and lines[i][2] == 'pressed':
-            endIdx = i
-            break
-    lines = lines[beginIdx:endIdx]
-
-    keylist = []
-    keyCounter = Counter()
-    for i in range(len(lines)):
-        if lines[i][2] == 'released':
-            keylist.append(lines[i])
-            keyCounter[lines[i][1]+'pressed'] -= 1
-        elif lines[i][2] == 'pressed':
-            if keyCounter[lines[i][1]+lines[i][2]] == 0:
-                keylist.append(lines[i])
-                keyCounter[lines[i][1]+lines[i][2]] += 1
-        
-    LastTime = keylist[0][0]
-    for i in range(len(keylist)):
-        if i == len(keylist): continue
-        if i == 0:
-            keylist[i][0] = 0
-            continue
-        temp = keylist[i][0]-LastTime
-        LastTime = keylist[i][0]
-        keylist[i][0] = temp
-        
-    os.makedirs(datapath + 'Script/', exist_ok=True)
-    filename = filename.replace('.log', '.script')
-    f = open(datapath + 'Script/' + filename, mode='w')
-    for line in keylist:
-        line = [str(line[i]) for i in range(len(line))]
-        f.write(' '.join(line)+'\n')
-    f.close()
-
 def process_line(line):
     if line[2] == 'pressed':
         pg.keyDown(line[1])
@@ -151,13 +105,11 @@ def read_script(filename):
     f = open(filename, mode='r')
     lines = f.readlines()
     f.close()
-    scriptTime = 0.0
     for i in range(len(lines)):
         lines[i] = lines[i].replace('\n', '')
         lines[i] = lines[i].split(' ')
         lines[i][0] = float(lines[i][0])
-        scriptTime += lines[i][0]
-    return scriptTime, lines
+    return lines[-1][0], lines
 
 def doByRows(filename, times):
     hwnd = win32gui.FindWindow(None, windowTiele)
@@ -180,8 +132,8 @@ def doByRows(filename, times):
 
     TimeFlag = time.time()
 
-    start_time = time.monotonic()
     dqlines = deque(lines)
+    start_time = time.monotonic()
     while dqlines:
         if escEvent.is_set():
             escEvent.clear()
@@ -189,13 +141,12 @@ def doByRows(filename, times):
         while True:
             if not pauseEvent.is_set():
                 break
+
         line = dqlines[0]
         delay = line[0] - (time.monotonic() - start_time)
-        delay = delay - 0.0083
         if delay > 0:
             time.sleep(delay)
             
-        start_time = time.monotonic()
         executor.submit(process_line, line)
         dqlines.popleft()
 
@@ -224,7 +175,8 @@ def ForegroundWindowDetector():
         time.sleep(0.1)
 
 randomKeyList = ['f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7', 'f8', 'f9', 'f10', 'f11', 'f12', 'f13']
-datapath = 'C:/ProgramData/Pmagic_log/Log/'
+logpath = 'C:/ProgramData/Pmagic_log/Log/'
+script_path = logpath+'Script_v2/'
 escEvent = threading.Event()
 pauseEvent = threading.Event()
 windowTiele = 'MapleStory'
@@ -239,13 +191,13 @@ while True:
     sys.stdout = _stdout
     sys.stderr = _stderr
     os.system('cls')
-    print("檔案儲存路徑:", datapath)
+    print("檔案儲存路徑:", logpath)
     d1 = input("選擇功能：\n(1) 錄製腳本\n(2) 執行腳本\n(3) 刪除腳本\n(4) exit\n")
 
     if d1 == '1':
         while True:
             scriptName = input("請輸入腳本名稱:")
-            if not os.path.exists(datapath+'Script/'+scriptName+'.script'):
+            if not os.path.exists(script_path+scriptName+'.script'):
                 break
             print("腳本名稱重複")
         
@@ -259,10 +211,10 @@ while True:
                 listener.join()
         except:
             pass
-        processScript(scriptName+'.log')
+        processScript(logpath, script_path, scriptName+'.log')
 
     elif d1 == '2':
-        filelist = os.listdir(datapath+'Script/')
+        filelist = os.listdir(script_path)
         while True:
             print('請選擇要執行的腳本')
             for idx, file in enumerate(filelist):
@@ -291,14 +243,14 @@ while True:
         log_history(os.path.basename(__file__))
         with keyboard.Listener(on_release=pause_and_continue):
             for i in range(d3):
-                if doByRows(datapath+'Script/'+filelist[d2], i):
+                if doByRows(script_path+filelist[d2], i):
                     break
         print = _print
 
     elif d1 == '3':
         while True:
             while True:
-                filelist = os.listdir(datapath+'Script/')
+                filelist = os.listdir(script_path)
                 print('請選擇要刪除的腳本')
                 for idx, file in enumerate(filelist):
                     print(f'({idx}) ', file)
@@ -311,7 +263,7 @@ while True:
                 print("wrong number")
             if d2 == len(filelist): break
             print('刪除腳本', filelist[d2])
-            os.remove(datapath+'Script/'+filelist[d2])
+            os.remove(script_path+filelist[d2])
             os.system('cls')
     
     elif d1 == '4':

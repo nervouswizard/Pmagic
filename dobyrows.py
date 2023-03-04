@@ -56,7 +56,7 @@ def doByRows(filename, times):
 
 
 datapath = 'C:/ProgramData/Pmagic/Log/'
-script_name = '202 風化悲傷之地.script'
+script_name = 'my_script.script'
 executor = ThreadPoolExecutor(max_workers=10)
 
 print('執行腳本', script_name)

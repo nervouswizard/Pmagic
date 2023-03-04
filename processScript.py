@@ -1,11 +1,12 @@
 from collections import defaultdict
 import os
 
-def processScript(datapath, filename):
-    with open(os.path.join(datapath, filename), mode='r') as f:
+def processScript(logpath, script_path, filename):
+    with open(os.path.join(logpath, filename), mode='r') as f:
         lines = [line.strip().split(' ') for line in f]
 
     beginIdx = 0
+    endIdx = 0
     for i, line in enumerate(lines):
         if line[1].startswith('Key.'):
             line[1] = line[1].replace('Key.', '')
@@ -16,6 +17,8 @@ def processScript(datapath, filename):
             endIdx = i
             break
     lines = lines[beginIdx:endIdx]
+    if lines == []:
+        return
 
     script_start_time = lines[0][0]
     keylist = []
@@ -29,13 +32,15 @@ def processScript(datapath, filename):
             keylist.append(line)
             keyCounter[line[1]+'pressed'] -= 1
 
-    os.makedirs(os.path.join(datapath, 'Script'), exist_ok=True)
+    os.makedirs(os.path.join(script_path), exist_ok=True)
     filename = filename.replace('.log', '.script')
-    with open(os.path.join(datapath, 'Script', filename), mode='w') as f:
+    with open(os.path.join(script_path, filename), mode='w') as f:
         for line in keylist:
             f.write(' '.join(str(elem) for elem in line)+'\n')
 
-
-datapath = 'C:/ProgramData/Pmagic/Log/'
-script_name = '202 風化悲傷之地.log'
-processScript(datapath, script_name)
+if __name__ == '__main__':
+    datapath = 'C:/ProgramData/Pmagic_log/Log/'
+    filelist = os.listdir(datapath)
+    for idx, file in enumerate(filelist):
+        if file.endswith('.log'):
+            processScript(datapath, file)
