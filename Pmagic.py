@@ -187,12 +187,22 @@ detector.start()
 executor = concurrent.futures.ThreadPoolExecutor(max_workers=10)
 
 while True:
+    # 刪除 logpath 資料夾內的其他 .log 跟 .err
+    filelist = os.listdir(logpath)
+    for idx, file in enumerate(filelist):
+        if file.startswith('Pmagic'): continue
+        if file.endswith(('.log', '.err')):
+            try:
+                os.remove(logpath+file)
+            except:
+                pass
+
     print = _print
     sys.stdout = _stdout
     sys.stderr = _stderr
     os.system('cls')
     print("檔案儲存路徑:", logpath)
-    d1 = input("選擇功能：\n(1) 錄製腳本\n(2) 執行腳本\n(3) 刪除腳本\n(4) exit\n")
+    d1 = input("\n選擇功能:\n\n(1) 錄製腳本\n(2) 執行腳本\n(3) 刪除腳本\n(4) exit\n")
 
     if d1 == '1':
         while True:
@@ -202,7 +212,7 @@ while True:
             print("腳本名稱重複")
         
         os.system('cls')
-        print("開始錄製腳本, 按下page_down後才算開始錄製")
+        print("開始錄製腳本, 按下 page_down 後才算開始錄製\n按 ESC 結束錄製")
         startTime = time.time()
         print = Logger.scriptTime_print
         log_history(scriptName)
