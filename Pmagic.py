@@ -96,7 +96,7 @@ def press_key(key):
     pg.press(key)
 
 def process_line(line):
-    if line[2] == 'pressed':
+    if line[2] == 'pressed' and random.random() > 0.01:
         pg.keyDown(line[1])
     elif line[2] == 'released':
         pg.keyUp(line[1])
@@ -125,10 +125,10 @@ def doByRows(filename, times):
     print('script Time: ', scriptTime)
     time.sleep(1)
 
-    for key in randomKeyList:
-        if random.random()>0.5:
-            press_key(key)
-            time.sleep(0.1)
+    # for key in randomKeyList:
+    #     if random.random()>0.5:
+    #         press_key(key)
+    #         time.sleep(0.1)
 
     TimeFlag = time.time()
 
@@ -146,7 +146,7 @@ def doByRows(filename, times):
         delay = line[0] - (time.monotonic() - start_time)
         if delay > 0:
             time.sleep(delay)
-            
+        
         executor.submit(process_line, line)
         dqlines.popleft()
 
