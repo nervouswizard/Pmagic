@@ -166,13 +166,14 @@ def ForegroundWindowDetector():
     while True:
         if escEvent.is_set():
             return True
-        
         hwnd = win32gui.GetForegroundWindow()
         title = win32gui.GetWindowText(hwnd)
         # print(pauseEvent.is_set())
         if not pauseEvent.is_set() and title != windowTiele:
+            print('pause')
             pauseEvent.set()
         if pauseEvent.is_set() and title == windowTiele:
+            print('continue')
             pauseEvent.clear()
         time.sleep(0.1)
 
