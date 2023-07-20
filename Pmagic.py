@@ -132,7 +132,7 @@ def random_mouse_click(window_size_and_position):
         x=random.randint(x1+100, x2-100)
         y=random.randint(y1+100, y2-150)
         mouse.move(x, y, multiplier=random.uniform(0.1, 0.5))
-        time.sleep(random.uniform(10, 30))
+        time.sleep(random.uniform(1, 2))
         pg.click()
 
 def doByRows(filename, times):
