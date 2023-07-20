@@ -132,7 +132,7 @@ def random_mouse_click(window_size_and_position):
         x=random.randint(x1+100, x2-100)
         y=random.randint(y1+100, y2-150)
         mouse.move(x, y, multiplier=random.uniform(0.1, 0.5))
-        time.sleep(random.uniform(0.5, 1.5))
+        time.sleep(random.uniform(10, 30))
         pg.click()
 
 def doByRows(filename, times):
@@ -170,6 +170,9 @@ def doByRows(filename, times):
     print('Process Time', ProcessTime)
     print(f'相差{ProcessTime - scriptTime}秒')
     print(f'平均每個指令相差{(ProcessTime - scriptTime)/len(lines)}秒')
+    escEvent.set()
+    mouse_thread.join()
+    escEvent.clear()
 
 def pause_and_continue(key):
     if key == keyboard.Key.esc:
