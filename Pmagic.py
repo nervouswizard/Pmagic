@@ -47,7 +47,6 @@ _stderr = sys.stderr
 from pynput import keyboard
 import pydirectinput as pg
 import threading
-from collections import Counter
 import win32gui
 import concurrent.futures
 from collections import deque
@@ -96,7 +95,7 @@ def press_key(key):
     pg.press(key)
 
 def process_line(line):
-    if line[2] == 'pressed' and random.random() > 0.01:
+    if line[2] == 'pressed':
         pg.keyDown(line[1])
     elif line[2] == 'released':
         pg.keyUp(line[1])
@@ -111,24 +110,27 @@ def read_script(filename):
         lines[i][0] = float(lines[i][0])
     return lines[-1][0], lines
 
-def doByRows(filename, times):
-    hwnd = win32gui.FindWindow(None, windowTiele)
+def get_window_size_and_position(window_title):
+    hwnd = win32gui.FindWindow(None, window_title)
     if hwnd == 0:
         print(f"找不到windowTiele為{windowTiele}的視窗")
-    else:
-        # 将焦点设置为目标窗口
-        win32gui.SetForegroundWindow(hwnd)
-    
+        return None
+
+    # 将焦点设置为目标窗口
+    win32gui.SetForegroundWindow(hwnd)
+
+    rect = win32gui.GetWindowRect(hwnd)
+    x, y, width, height = rect
+    return (width - x, height - y, x, y)
+
+def doByRows(filename, times):
+    window_size_and_position = get_window_size_and_position(windowTiele)
+
     scriptTime, lines = read_script(filename)
 
     print(f"第{times}次迴圈倒數1秒")
     print('script Time: ', scriptTime)
     time.sleep(1)
-
-    # for key in randomKeyList:
-    #     if random.random()>0.5:
-    #         press_key(key)
-    #         time.sleep(0.1)
 
     TimeFlag = time.time()
 
@@ -180,7 +182,6 @@ script_path = logpath+'Script_v2/'
 escEvent = threading.Event()
 pauseEvent = threading.Event()
 windowTiele = 'MapleStory'
-hwnd = win32gui.FindWindow(None, windowTiele)
 detector = threading.Thread(target = ForegroundWindowDetector)
 detector.daemon = True
 detector.start()
