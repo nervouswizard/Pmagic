@@ -50,6 +50,7 @@ import threading
 import win32gui
 import concurrent.futures
 from collections import deque
+from pyHM import mouse
 from processScript import processScript
 
 pg.KEYBOARD_MAPPING['page_up'] = 0xC9 + 1024
@@ -115,17 +116,29 @@ def get_window_size_and_position(window_title):
     if hwnd == 0:
         print(f"找不到windowTiele為{windowTiele}的視窗")
         return None
-
     # 将焦点设置为目标窗口
     win32gui.SetForegroundWindow(hwnd)
+    return win32gui.GetWindowRect(hwnd)
 
-    rect = win32gui.GetWindowRect(hwnd)
-    x, y, width, height = rect
-    return (width - x, height - y, x, y)
+def random_mouse_click(window_size_and_position):
+    while True:
+        if escEvent.is_set():
+            return
+        while True:
+            if not pauseEvent.is_set():
+                break
+    
+        x1, y1, x2, y2 = window_size_and_position
+        x=random.randint(x1+100, x2-100)
+        y=random.randint(y1+100, y2-150)
+        mouse.move(x, y, multiplier=random.uniform(0.1, 0.5))
+        time.sleep(random.uniform(0.5, 1.5))
+        pg.click()
 
 def doByRows(filename, times):
     window_size_and_position = get_window_size_and_position(windowTiele)
-
+    mouse_thread = threading.Thread(target=random_mouse_click, args=(window_size_and_position,))
+    mouse_thread.start()
     scriptTime, lines = read_script(filename)
 
     print(f"第{times}次迴圈倒數1秒")
@@ -138,6 +151,7 @@ def doByRows(filename, times):
     start_time = time.monotonic()
     while dqlines:
         if escEvent.is_set():
+            mouse_thread.join()
             escEvent.clear()
             return True
         while True:
