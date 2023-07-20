@@ -122,7 +122,7 @@ def get_window_size_and_position(window_title):
 
 def random_mouse_click(window_size_and_position):
     while True:
-        if escEvent.is_set():
+        if stopmouseEvent.is_set():
             return
         while True:
             if not pauseEvent.is_set():
@@ -151,7 +151,9 @@ def doByRows(filename, times):
     start_time = time.monotonic()
     while dqlines:
         if escEvent.is_set():
+            stopmouseEvent.set()
             mouse_thread.join()
+            stopmouseEvent.clear()
             escEvent.clear()
             return True
         while True:
@@ -170,9 +172,9 @@ def doByRows(filename, times):
     print('Process Time', ProcessTime)
     print(f'相差{ProcessTime - scriptTime}秒')
     print(f'平均每個指令相差{(ProcessTime - scriptTime)/len(lines)}秒')
-    escEvent.set()
+    stopmouseEvent.set()
     mouse_thread.join()
-    escEvent.clear()
+    stopmouseEvent.clear()
 
 def pause_and_continue(key):
     if key == keyboard.Key.esc:
@@ -199,6 +201,7 @@ logpath = 'C:/ProgramData/Pmagic_log/Log/'
 script_path = logpath+'Script_v2/'
 escEvent = threading.Event()
 pauseEvent = threading.Event()
+stopmouseEvent = threading.Event()
 windowTiele = 'MapleStory'
 detector = threading.Thread(target = ForegroundWindowDetector)
 detector.daemon = True
