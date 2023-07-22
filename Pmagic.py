@@ -123,6 +123,7 @@ def get_window_size_and_position(window_title):
 def random_mouse_click(window_size_and_position):
     while True:
         if stopmouseEvent.is_set():
+            stopmouseEvent.clear()
             return
         while True:
             if not pauseEvent.is_set():
@@ -132,13 +133,15 @@ def random_mouse_click(window_size_and_position):
         x=random.randint(x1+100, x2-100)
         y=random.randint(y1+100, y2-150)
         mouse.move(x, y, multiplier=random.uniform(0.1, 0.5))
-        time.sleep(random.uniform(1, 2))
+        time.sleep(random.uniform(3, 5))
         pg.click()
 
 def doByRows(filename, times):
-    window_size_and_position = get_window_size_and_position(windowTiele)
-    mouse_thread = threading.Thread(target=random_mouse_click, args=(window_size_and_position,))
-    mouse_thread.start()
+    if UsewindowTiele:
+        window_size_and_position = get_window_size_and_position(windowTiele)
+        mouse_thread = threading.Thread(target=random_mouse_click, args=(window_size_and_position,))
+        mouse_thread.start()
+    
     scriptTime, lines = read_script(filename)
 
     print(f"第{times}次迴圈倒數1秒")
@@ -152,8 +155,6 @@ def doByRows(filename, times):
     while dqlines:
         if escEvent.is_set():
             stopmouseEvent.set()
-            mouse_thread.join()
-            stopmouseEvent.clear()
             escEvent.clear()
             return True
         while True:
@@ -173,8 +174,6 @@ def doByRows(filename, times):
     print(f'相差{ProcessTime - scriptTime}秒')
     print(f'平均每個指令相差{(ProcessTime - scriptTime)/len(lines)}秒')
     stopmouseEvent.set()
-    mouse_thread.join()
-    stopmouseEvent.clear()
 
 def pause_and_continue(key):
     if key == keyboard.Key.esc:
@@ -202,10 +201,12 @@ script_path = logpath+'Script_v2/'
 escEvent = threading.Event()
 pauseEvent = threading.Event()
 stopmouseEvent = threading.Event()
+UsewindowTiele = False
 windowTiele = 'MapleStory'
-detector = threading.Thread(target = ForegroundWindowDetector)
-detector.daemon = True
-detector.start()
+if UsewindowTiele:
+    detector = threading.Thread(target = ForegroundWindowDetector)
+    detector.daemon = True
+    detector.start()
 executor = concurrent.futures.ThreadPoolExecutor(max_workers=10)
 
 while True:
