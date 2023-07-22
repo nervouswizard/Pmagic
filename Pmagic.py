@@ -52,6 +52,7 @@ import concurrent.futures
 from collections import deque
 from pyHM import mouse
 from processScript import processScript
+import configparser
 
 pg.KEYBOARD_MAPPING['page_up'] = 0xC9 + 1024
 pg.KEYBOARD_MAPPING['page_down'] = 0xD1 + 1024
@@ -139,6 +140,7 @@ def random_mouse_click(window_size_and_position):
 def doByRows(filename, times):
     if UsewindowTiele:
         window_size_and_position = get_window_size_and_position(windowTiele)
+    if UsewindowTiele and Use_mouse_random_move:
         mouse_thread = threading.Thread(target=random_mouse_click, args=(window_size_and_position,))
         mouse_thread.start()
     
@@ -195,18 +197,24 @@ def ForegroundWindowDetector():
             pauseEvent.clear()
         time.sleep(0.1)
 
-randomKeyList = ['f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7', 'f8', 'f9', 'f10', 'f11', 'f12', 'f13']
+configreader = configparser.ConfigParser()
+configreader.read('config.ini', encoding='utf-8')
+config = dict(configreader.items('Pmagic'))
+del configreader
+UsewindowTiele = config['focus_on_window_title']=='true'
+windowTiele = config['window_tiele']
+Use_mouse_random_move = config['use_mouse_random_move']=='true'
+
 logpath = 'C:/ProgramData/Pmagic_log/Log/'
 script_path = logpath+'Script_v2/'
 escEvent = threading.Event()
 pauseEvent = threading.Event()
 stopmouseEvent = threading.Event()
-UsewindowTiele = False
-windowTiele = 'MapleStory'
 if UsewindowTiele:
     detector = threading.Thread(target = ForegroundWindowDetector)
     detector.daemon = True
     detector.start()
+
 executor = concurrent.futures.ThreadPoolExecutor(max_workers=10)
 
 while True:
