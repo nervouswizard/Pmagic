@@ -126,9 +126,6 @@ def random_mouse_click(window_size_and_position):
         if stopmouseEvent.is_set():
             stopmouseEvent.clear()
             return
-        while True:
-            if not pauseEvent.is_set():
-                break
     
         x1, y1, x2, y2 = window_size_and_position
         x=random.randint(x1+100, x2-100)
@@ -159,9 +156,6 @@ def doByRows(filename, times):
             stopmouseEvent.set()
             escEvent.clear()
             return True
-        while True:
-            if not pauseEvent.is_set():
-                break
 
         line = dqlines[0]
         delay = line[0] - (time.monotonic() - start_time)
@@ -180,22 +174,6 @@ def doByRows(filename, times):
 def pause_and_continue(key):
     if key == keyboard.Key.esc:
         escEvent.set()
-        pauseEvent.clear()
-
-def ForegroundWindowDetector():
-    while True:
-        if escEvent.is_set():
-            return True
-        hwnd = win32gui.GetForegroundWindow()
-        title = win32gui.GetWindowText(hwnd)
-        # print(pauseEvent.is_set())
-        if not pauseEvent.is_set() and title != windowTiele:
-            print('pause')
-            pauseEvent.set()
-        if pauseEvent.is_set() and title == windowTiele:
-            print('continue')
-            pauseEvent.clear()
-        time.sleep(0.1)
 
 configreader = configparser.ConfigParser()
 configreader.read('config.ini', encoding='utf-8')
@@ -208,12 +186,7 @@ Use_mouse_random_move = config['use_mouse_random_move']=='true'
 logpath = 'C:/ProgramData/Pmagic_log/Log/'
 script_path = logpath+'Script_v2/'
 escEvent = threading.Event()
-pauseEvent = threading.Event()
 stopmouseEvent = threading.Event()
-if UsewindowTiele:
-    detector = threading.Thread(target = ForegroundWindowDetector)
-    detector.daemon = True
-    detector.start()
 
 executor = concurrent.futures.ThreadPoolExecutor(max_workers=10)
 
