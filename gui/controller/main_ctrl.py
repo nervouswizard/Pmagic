@@ -1,19 +1,25 @@
 from PyQt6 import QtWidgets
 from gui.main import Ui_MainWindow
 from setting.config import config_reader
+from gui.controller.createScript_ctrl import createScript_MainWindow_controller
 import os
 
 class MainWindow_controller(QtWidgets.QMainWindow):
     def __init__(self):
+        # qt init
         super().__init__()
-        self.config = config_reader('Pmagic')
-
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+
+        self.config = config_reader('Pmagic')
+        self.new_script_dialog = createScript_MainWindow_controller()
         self.init()
+
+        # bind function
         self.ui.scripts_list.customContextMenuRequested.connect(self.show_context_menu)
         self.ui.search_bar_for_script.textChanged.connect(self.filter_scripts_list)
         self.ui.scripts_list.itemClicked.connect(self.show_selected_item)
+        self.ui.actionNew_script.triggered.connect(self.trigger_new_script)
 
     def init(self):
         # 顯示所有的腳本
@@ -49,6 +55,10 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     # 顯示被選擇的腳本
     def show_selected_item(self, item):
         self.ui.selected_script.setText(item.text())
+
+    # 按下New script
+    def trigger_new_script(self):
+        self.new_script_dialog.show()
 
     def delete_script(self):
         print('delete')

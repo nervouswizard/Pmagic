@@ -12,7 +12,21 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
-        Dialog.resize(400, 300)
+        Dialog.resize(362, 328)
+        self.name_line = QtWidgets.QLineEdit(parent=Dialog)
+        self.name_line.setGeometry(QtCore.QRect(10, 10, 341, 20))
+        self.name_line.setObjectName("name_line")
+        self.start_button = QtWidgets.QPushButton(parent=Dialog)
+        self.start_button.setGeometry(QtCore.QRect(20, 290, 75, 23))
+        self.start_button.setObjectName("start_button")
+        self.stop_button = QtWidgets.QPushButton(parent=Dialog)
+        self.stop_button.setGeometry(QtCore.QRect(270, 290, 75, 23))
+        self.stop_button.setObjectName("stop_button")
+        self.list = QtWidgets.QListWidget(parent=Dialog)
+        self.list.setGeometry(QtCore.QRect(10, 40, 341, 241))
+        self.list.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.list.setDefaultDropAction(QtCore.Qt.DropAction.IgnoreAction)
+        self.list.setObjectName("list")
 
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
@@ -20,3 +34,5 @@ class Ui_Dialog(object):
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "Dialog"))
+        self.start_button.setText(_translate("Dialog", "START"))
+        self.stop_button.setText(_translate("Dialog", "STOP"))
