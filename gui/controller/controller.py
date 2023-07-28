@@ -29,6 +29,13 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         script_list = os.listdir(self.config.get("script_path"))
         self.ui.scripts_list.clear()
         self.ui.scripts_list.addItems(script_list)
+        # 檢查Setting 相關 config
+        if self.config.get('use_background_running') == 'true':
+            self.ui.actionUse_background_running.setChecked(True)
+        if self.config.get('focus_on_window') == 'true':
+            self.ui.actionFocus_on_window.setChecked(True)
+        if self.config.get('use_mouse_random_move') == 'true':
+            self.ui.actionUse_mouse_random_move.setChecked(True)
     
     # 按滑鼠右鍵顯示
     def show_context_menu(self, pos):
