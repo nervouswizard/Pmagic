@@ -1,6 +1,6 @@
 from PyQt6 import QtWidgets
 from gui.main import Ui_MainWindow
-from setting.config import config_reader
+from setting.config import Config_reader
 from gui.controller.createScript_ctrl import createScript_MainWindow_controller
 import os
 
@@ -11,7 +11,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
-        self.config = config_reader('Pmagic')
+        self.config = Config_reader('Pmagic')
         self.new_script_dialog = createScript_MainWindow_controller()
         self.init()
 

@@ -19,9 +19,6 @@ class Ui_Dialog(object):
         self.start_button = QtWidgets.QPushButton(parent=Dialog)
         self.start_button.setGeometry(QtCore.QRect(20, 290, 75, 23))
         self.start_button.setObjectName("start_button")
-        self.stop_button = QtWidgets.QPushButton(parent=Dialog)
-        self.stop_button.setGeometry(QtCore.QRect(270, 290, 75, 23))
-        self.stop_button.setObjectName("stop_button")
         self.list = QtWidgets.QListWidget(parent=Dialog)
         self.list.setGeometry(QtCore.QRect(10, 40, 341, 241))
         self.list.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers)
@@ -35,4 +32,3 @@ class Ui_Dialog(object):
         _translate = QtCore.QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "Dialog"))
         self.start_button.setText(_translate("Dialog", "START"))
-        self.stop_button.setText(_translate("Dialog", "STOP"))

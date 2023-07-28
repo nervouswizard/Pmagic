@@ -1,7 +1,8 @@
-from PyQt6 import QtWidgets
-from setting.config import config_reader
+from PyQt6 import QtWidgets, QtGui
+from setting.config import Config_reader
 from gui.createScript import Ui_Dialog
 from gui.messagebox import Messagebox
+from manipulate.recorder import Recorder
 import os
 
 class createScript_MainWindow_controller(QtWidgets.QMainWindow):
@@ -10,13 +11,14 @@ class createScript_MainWindow_controller(QtWidgets.QMainWindow):
         self.ui = Ui_Dialog()
         self.ui.setupUi(self)
 
-        self.config = config_reader('Pmagic')
+        self.config = Config_reader('Pmagic')
+        self.recorder = Recorder()
         self.init()
-
+        
         # bind function
         self.ui.name_line.textChanged.connect(self.name_list_changed)
         self.ui.start_button.clicked.connect(self.start_button_click)
-        self.ui.stop_button.clicked.connect(self.stop_button_click)
+        self.recorder.finished.connect(self.stop_recording)
 
 
     def init(self):
@@ -27,7 +29,9 @@ class createScript_MainWindow_controller(QtWidgets.QMainWindow):
         self.ui.list.clear()
         self.ui.list.addItem(f"腳本儲存位置 : {self.config.get('script_path')}")
         self.ui.list.addItem(f"腳本名稱 : {self.ui.name_line.text()}")
-        self.ui.list.addItem("按start以開始錄製腳本")
+        self.ui.list.addItem("按start以立刻開始錄製腳本")
+        self.ui.list.addItem("按ESC以結束錄製, 直接關閉視窗會導致錄製失敗")
+        self.ui.list.item(3).setForeground(QtGui.QColor(255,0,0))
 
     def start_button_click(self):
         if os.path.exists(os.path.join(self.config.get('script_path'), self.ui.name_line.text()+'.script')):
@@ -35,10 +39,10 @@ class createScript_MainWindow_controller(QtWidgets.QMainWindow):
             return
         self.ui.name_line.setReadOnly(True)
         self.ui.list.addItem("START")
+        self.recorder.start()
 
-    def stop_button_click(self):
+    def stop_recording(self):
         self.ui.list.addItem("END")
         self.ui.list.addItem("儲存中")
         self.ui.list.addItem("儲存完成")
         self.ui.name_line.setReadOnly(False)
-        self.init()
