@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>657</width>
-    <height>587</height>
+    <height>591</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -165,33 +165,18 @@
    <property name="text">
     <string>Use background running</string>
    </property>
-   <property name="autoRepeat">
-    <bool>false</bool>
-   </property>
   </action>
   <action name="actionFocus_on_window">
    <property name="checkable">
     <bool>true</bool>
    </property>
-   <property name="checked">
-    <bool>false</bool>
-   </property>
    <property name="text">
     <string>Focus on window</string>
    </property>
-   <property name="autoRepeat">
-    <bool>false</bool>
-   </property>
   </action>
   <action name="actionUse_mouse_random_move">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
    <property name="text">
     <string>Use mouse random move</string>
-   </property>
-   <property name="autoRepeat">
-    <bool>false</bool>
    </property>
   </action>
  </widget>

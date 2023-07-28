@@ -1,4 +1,4 @@
-# Form implementation generated from reading ui file 'GUI.ui'
+# Form implementation generated from reading ui file 'main.ui'
 #
 # Created by: PyQt6 UI code generator 6.5.2
 #
@@ -12,7 +12,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(657, 587)
+        MainWindow.resize(657, 591)
         MainWindow.setAutoFillBackground(False)
         self.centralwidget = QtWidgets.QWidget(parent=MainWindow)
         self.centralwidget.setObjectName("centralwidget")
@@ -81,16 +81,11 @@ class Ui_MainWindow(object):
         self.actionUse_background_running = QtGui.QAction(parent=MainWindow)
         self.actionUse_background_running.setCheckable(True)
         self.actionUse_background_running.setChecked(False)
-        self.actionUse_background_running.setAutoRepeat(False)
         self.actionUse_background_running.setObjectName("actionUse_background_running")
         self.actionFocus_on_window = QtGui.QAction(parent=MainWindow)
         self.actionFocus_on_window.setCheckable(True)
-        self.actionFocus_on_window.setChecked(False)
-        self.actionFocus_on_window.setAutoRepeat(False)
         self.actionFocus_on_window.setObjectName("actionFocus_on_window")
         self.actionUse_mouse_random_move = QtGui.QAction(parent=MainWindow)
-        self.actionUse_mouse_random_move.setCheckable(True)
-        self.actionUse_mouse_random_move.setAutoRepeat(False)
         self.actionUse_mouse_random_move.setObjectName("actionUse_mouse_random_move")
         self.menuFile.addAction(self.actionNew_script)
         self.menuSetting.addAction(self.actionUse_background_running)
