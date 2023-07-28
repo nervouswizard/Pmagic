@@ -13,24 +13,56 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
+  <property name="autoFillBackground">
+   <bool>false</bool>
+  </property>
   <widget class="QWidget" name="centralwidget">
+   <widget class="QPushButton" name="start_script">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>520</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>START</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="stop_script">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>520</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>STOP</string>
+    </property>
+   </widget>
    <widget class="QWidget" name="">
     <property name="geometry">
      <rect>
-      <x>72</x>
-      <y>112</y>
-      <width>181</width>
-      <height>226</height>
+      <x>497</x>
+      <y>40</y>
+      <width>151</width>
+      <height>491</height>
      </rect>
     </property>
-    <layout class="QVBoxLayout" name="verticalLayout">
-     <item>
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="0">
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
         <widget class="QLineEdit" name="search_bar_for_script"/>
        </item>
        <item>
         <widget class="QPushButton" name="search_button">
+         <property name="layoutDirection">
+          <enum>Qt::RightToLeft</enum>
+         </property>
          <property name="text">
           <string/>
          </property>
@@ -38,12 +70,46 @@
           <iconset>
            <normaloff>../icon/search.png</normaloff>../icon/search.png</iconset>
          </property>
+         <property name="shortcut">
+          <string/>
+         </property>
+         <property name="autoDefault">
+          <bool>false</bool>
+         </property>
+         <property name="default">
+          <bool>false</bool>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
         </widget>
        </item>
       </layout>
      </item>
-     <item>
+     <item row="1" column="0">
       <widget class="QListWidget" name="scripts_list"/>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>70</y>
+      <width>191</width>
+      <height>441</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QLabel" name="selected_script">
+       <property name="text">
+        <string>None</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QListView" name="listView"/>
      </item>
     </layout>
    </widget>
@@ -57,8 +123,53 @@
      <height>21</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="autoFillBackground">
+     <bool>true</bool>
+    </property>
+    <property name="title">
+     <string>File</string>
+    </property>
+    <property name="separatorsCollapsible">
+     <bool>false</bool>
+    </property>
+    <property name="toolTipsVisible">
+     <bool>false</bool>
+    </property>
+    <addaction name="actionNew_script"/>
+   </widget>
+   <widget class="QMenu" name="menuSetting">
+    <property name="title">
+     <string>Setting</string>
+    </property>
+    <addaction name="actionUse_background_running"/>
+    <addaction name="actionFocus_on_window"/>
+    <addaction name="actionUse_mouse_random_move"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuSetting"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionNew_script">
+   <property name="text">
+    <string>New script</string>
+   </property>
+  </action>
+  <action name="actionUse_background_running">
+   <property name="text">
+    <string>Use background running</string>
+   </property>
+  </action>
+  <action name="actionFocus_on_window">
+   <property name="text">
+    <string>Focus on window</string>
+   </property>
+  </action>
+  <action name="actionUse_mouse_random_move">
+   <property name="text">
+    <string>Use mouse random move</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>
