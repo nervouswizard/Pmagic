@@ -1,5 +1,5 @@
 from commentedconfigparser import CommentedConfigParser
-import configparser, os
+import os
 
 class config_reader():
     def __init__(self, entity_title):
