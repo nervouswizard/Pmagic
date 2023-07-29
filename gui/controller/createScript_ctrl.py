@@ -12,13 +12,11 @@ class createScript_MainWindow_controller(QtWidgets.QMainWindow):
         self.ui.setupUi(self)
 
         self.config = Config_reader('Pmagic')
-        self.recorder = Recorder()
         self.init()
-        
+
         # bind function
         self.ui.name_line.textChanged.connect(self.name_list_changed)
         self.ui.start_button.clicked.connect(self.start_button_click)
-        self.recorder.finished.connect(self.stop_recording)
 
 
     def init(self):
@@ -38,11 +36,13 @@ class createScript_MainWindow_controller(QtWidgets.QMainWindow):
             Messagebox.waring_message_box("錯誤", "腳本名稱重複!")
             return
         self.ui.name_line.setReadOnly(True)
+        self.ui.start_button.setEnabled(False)
+        self.recorder = Recorder(self.ui.name_line.text())
+        self.recorder.finished.connect(self.stop_recording)
         self.ui.list.addItem("START")
         self.recorder.start()
 
     def stop_recording(self):
         self.ui.list.addItem("END")
-        self.ui.list.addItem("儲存中")
-        self.ui.list.addItem("儲存完成")
         self.ui.name_line.setReadOnly(False)
+        self.ui.start_button.setEnabled(True)

@@ -23,6 +23,8 @@ class Ui_Dialog(object):
         self.list.setGeometry(QtCore.QRect(10, 40, 341, 241))
         self.list.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers)
         self.list.setDefaultDropAction(QtCore.Qt.DropAction.IgnoreAction)
+        self.list.setSelectionMode(QtWidgets.QAbstractItemView.SelectionMode.NoSelection)
+        self.list.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectionBehavior.SelectItems)
         self.list.setObjectName("list")
 
         self.retranslateUi(Dialog)

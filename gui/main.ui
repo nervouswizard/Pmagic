@@ -43,7 +43,7 @@
      <string>STOP</string>
     </property>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>497</x>
@@ -87,11 +87,15 @@
       </layout>
      </item>
      <item row="1" column="0">
-      <widget class="QListWidget" name="scripts_list"/>
+      <widget class="QListWidget" name="scripts_list">
+       <property name="contextMenuPolicy">
+        <enum>Qt::CustomContextMenu</enum>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>20</x>
@@ -175,6 +179,9 @@
    </property>
   </action>
   <action name="actionUse_mouse_random_move">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Use mouse random move</string>
    </property>
