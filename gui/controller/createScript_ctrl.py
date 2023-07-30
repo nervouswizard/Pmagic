@@ -2,7 +2,7 @@ from PyQt6 import QtWidgets, QtGui
 from setting.config import Config_reader
 from gui.createScript import Ui_Dialog
 from gui.messagebox import Messagebox
-from manipulate.recorder import Recorder
+from manipulate.manipulator import Recorder
 import os
 
 class createScript_MainWindow_controller(QtWidgets.QMainWindow):

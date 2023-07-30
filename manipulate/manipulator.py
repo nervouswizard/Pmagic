@@ -1,8 +1,11 @@
 from pynput import keyboard
-from PyQt6.QtCore import QThread
+from PyQt6.QtCore import QThread, pyqtSignal
 from collections import defaultdict
 from setting.config import Config_reader
-import time, os, shutil
+from collections import deque
+from concurrent.futures import ThreadPoolExecutor
+import pydirectinput as pg
+import time, os, shutil, win32gui
 
 class Recorder(QThread):
     def __init__(self, filename):
@@ -112,3 +115,65 @@ class Deleter():
 
                 if days_difference > 30:
                     os.remove(file_path)
+
+def process_line(line):
+    if line[2] == 'pressed':
+        pg.keyDown(line[1])
+    elif line[2] == 'released':
+        pg.keyUp(line[1])
+
+
+class Runner(QThread):
+    def __init__(self, filename):
+        super().__init__()
+        self.config = Config_reader('Pmagic')
+        self.filename = filename
+        self.read_script()
+
+    def read_script(self):
+        f = open(os.path.join(self.config.get('script_path'), self.filename), mode='r')
+        lines = f.readlines()
+        f.close()
+        for i in range(len(lines)):
+            lines[i] = lines[i].replace('\n', '')
+            lines[i] = lines[i].split(' ')
+            lines[i][0] = float(lines[i][0])
+        self.scriptTime = lines[-1][0]
+        self.lines = lines
+        self.dqlines = deque(lines)
+    
+    def set_foreground_window(self):
+        hwnd = win32gui.FindWindow(None, self.config.get('window_tiele'))
+        if hwnd == 0:
+            print(f"找不到windowTiele為{self.config.get('window_tiele')}的視窗")
+            return None
+        # 将焦点设置为目标窗口
+        win32gui.SetForegroundWindow(hwnd)
+        return win32gui.GetWindowRect(hwnd)
+
+    def run_script_function1(self):
+        executor = ThreadPoolExecutor(max_workers=10)
+        start_time = time.monotonic()
+        while self.dqlines:
+            line = self.dqlines[0]
+            delay = line[0] - (time.monotonic() - start_time)
+            if delay > 0:
+                time.sleep(delay)
+            
+            executor.submit(process_line, line)
+            self.dqlines.popleft()
+
+    def run(self):
+        self.set_foreground_window()
+        for times in range(int(self.config.get('script_times'))):
+            print(f"第{times}次迴圈倒數開始")
+            print('script Time: ', self.scriptTime)
+
+            TimeFlag = time.time()
+
+            self.run_script_function1()
+            
+            ProcessTime = time.time()-TimeFlag
+            print('Process Time', ProcessTime)
+            print(f'相差{ProcessTime - self.scriptTime}秒')
+            print(f'平均每個指令相差{(ProcessTime - self.scriptTime)/len(self.lines)}秒')

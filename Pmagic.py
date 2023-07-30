@@ -300,7 +300,7 @@ def pause_and_continue(key):
         escEvent.set()
 
 configreader = configparser.ConfigParser()
-configreader.read('config.ini', encoding='utf-8')
+configreader.read('setting/config.ini', encoding='utf-8')
 config = dict(configreader.items('Pmagic'))
 del configreader
 windowTiele = config['window_tiele']
