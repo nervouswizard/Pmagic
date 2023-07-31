@@ -122,7 +122,6 @@ def process_line(line):
     elif line[2] == 'released':
         pg.keyUp(line[1])
 
-
 class Runner(QThread):
     def __init__(self, filename):
         super().__init__()
@@ -140,7 +139,6 @@ class Runner(QThread):
             lines[i][0] = float(lines[i][0])
         self.scriptTime = lines[-1][0]
         self.lines = lines
-        self.dqlines = deque(lines)
     
     def set_foreground_window(self):
         hwnd = win32gui.FindWindow(None, self.config.get('window_tiele'))
@@ -154,6 +152,8 @@ class Runner(QThread):
     def run_script_function1(self):
         executor = ThreadPoolExecutor(max_workers=10)
         start_time = time.monotonic()
+
+        self.dqlines = deque(self.lines)
         while self.dqlines:
             line = self.dqlines[0]
             delay = line[0] - (time.monotonic() - start_time)

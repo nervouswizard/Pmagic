@@ -5,7 +5,7 @@ from gui.messagebox import Messagebox
 from manipulate.manipulator import Recorder
 import os
 
-class createScript_MainWindow_controller(QtWidgets.QMainWindow):
+class createScript_MainWindow_controller(QtWidgets.QDialog):
     def __init__(self):
         super().__init__()
         self.ui = Ui_Dialog()

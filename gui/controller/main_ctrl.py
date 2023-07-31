@@ -17,6 +17,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         os.makedirs(self.config.get('delete_path'), exist_ok=True)
         Deleter.delete_old_files()
         self.new_script_dialog = createScript_MainWindow_controller()
+        self.new_script_dialog.finished.connect(self.init)
         self.init()
 
         # bind function
