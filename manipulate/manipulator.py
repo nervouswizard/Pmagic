@@ -1,5 +1,5 @@
 from pynput import keyboard
-from PyQt6.QtCore import QThread, pyqtSignal
+from PyQt6.QtCore import QThread
 from collections import defaultdict
 from setting.config import Config_reader
 from collections import deque
