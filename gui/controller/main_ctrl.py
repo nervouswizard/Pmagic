@@ -103,6 +103,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         qimg = qimg.scaled(self.ui.hpmp_label.width(), self.ui.hpmp_label.height(), QtCore.Qt.AspectRatioMode.KeepAspectRatio)
         canvas = QtGui.QPixmap().fromImage(qimg)
         self.ui.hpmp_label.setPixmap(canvas)
+        del img, height, width, channel, bytesPerline, qimg, canvas
 
     # scripts_list 按滑鼠右鍵顯示
     def show_context_menu(self, pos):
@@ -160,7 +161,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.capture.minimap_stop = False
             self.capture.build_thread()
             self.capture.minimap_thread.start()
-            self.minimap_timer.start(1)
+            self.minimap_timer.start(10)
         else:
             self.config.set('show_minimap', 'false')
             self.capture.minimap_stop = True
@@ -176,7 +177,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.capture.hpmp_stop = False
             self.capture.build_thread()
             self.capture.hpmp_thread.start()
-            self.hpmp_timer.start(1)
+            self.hpmp_timer.start(10)
         else:
             self.config.set('show_hpmp', 'false')
             self.capture.hpmp_stop = True

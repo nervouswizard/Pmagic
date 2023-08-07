@@ -3,6 +3,7 @@ import ctypes, os, sys, cv2, time
 from threading import Thread
 import numpy as np
 from ctypes import wintypes
+from manipulate.manipulator import process_line
 import mss
 import mss.windows
 user32 = ctypes.windll.user32
@@ -93,8 +94,7 @@ class Capture():
         try:
             return np.array(mss.mss().grab(self.window))
         except :
-            print(f'\n[!] Error while taking screenshot, retrying in {delay} second'
-                  + ('s' if delay != 1 else ''))
+            print(f'\n[!] Error while taking screenshot, retrying in {delay} second' + ('s' if delay != 1 else ''))
             time.sleep(delay)
 
     def hpmp_capture(self):
@@ -127,12 +127,23 @@ class Capture():
             _, b = cv2.threshold(b, 127, 255, cv2.THRESH_BINARY)
             mp = np.argmin(np.diff(np.sum(b, axis=0).tolist()))
 
-            self.hp_percent = hp*100//frame.shape[1]
-            self.mp_percent = mp*100//frame.shape[1]
+            hp_percent = hp*100//frame.shape[1]
+            mp_percent = mp*100//frame.shape[1]
 
             frame = cv2.line(frame, (hp, 0), (hp, 16), (0, 0, 0), 1)
             frame = cv2.line(frame, (mp, 17), (mp, frame.shape[1]), (0, 0, 0), 1)
             self.hpmp = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+            # 決定要不要用藥水
+            if self.config.get('auto_hpmp_check') == 'true':
+                if hp_percent < int(self.config.get('hp_threshold')):
+                    process_line([0, self.config.get('hp_key'), 'pressed'])
+                    time.sleep(0.01)
+                    process_line([0, self.config.get('hp_key'), 'released'])
+                if mp_percent < int(self.config.get('mp_threshold')):
+                    process_line([0, self.config.get('mp_key'), 'pressed'])
+                    time.sleep(0.01)
+                    process_line([0, self.config.get('mp_key'), 'released'])
             
     def minimap_capture(self):
         while True:
@@ -162,9 +173,25 @@ class Capture():
 
             if player:
                 frame = cv2.circle(frame, player[0], 3, (0,0,255), -1)
+                
 
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             self.minimap = frame
+
+            # 有其他玩家就結束遊戲
+            # print(other)
+            # if other:
+            #     process_line([0, 'esc', 'pressed'])
+            #     time.sleep(0.01)
+            #     process_line([0, 'esc', 'released'])
+            #     time.sleep(0.01)
+            #     process_line([0, 'up', 'pressed'])
+            #     time.sleep(0.01)
+            #     process_line([0, 'up', 'released'])
+            #     time.sleep(0.01)
+            #     process_line([0, 'enter', 'pressed'])
+            #     time.sleep(0.01)
+            #     process_line([0, 'enter', 'released'])
 
 if __name__=='__main__':
     sys.path.append(os.getcwd())
