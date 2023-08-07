@@ -34,6 +34,8 @@ class Capture():
             'height': 768
         }
 
+        self.sct = None
+        
         self.minimap = None
         self.minimap_stop = False
 
@@ -92,7 +94,7 @@ class Capture():
 
     def screenshot(self, delay=1):
         try:
-            return np.array(mss.mss().grab(self.window))
+            return np.array(self.sct.grab(self.window))
         except :
             print(f'\n[!] Error while taking screenshot, retrying in {delay} second' + ('s' if delay != 1 else ''))
             time.sleep(delay)
@@ -101,7 +103,8 @@ class Capture():
         while True:
             if self.hpmp_stop: break
             self.find_window()
-            frame = self.screenshot()
+            with mss.mss() as self.sct:
+                frame = self.screenshot()
             if frame is None:
                 continue
             
@@ -149,7 +152,8 @@ class Capture():
         while True:
             if self.minimap_stop: break
             self.find_window()
-            frame = self.screenshot()
+            with mss.mss() as self.sct:
+                frame = self.screenshot()
             if frame is None:
                 continue
             
